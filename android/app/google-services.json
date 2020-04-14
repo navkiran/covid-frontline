@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "315449396820",
+    "firebase_url": "https://covidfrontline-nks101703365.firebaseio.com",
+    "project_id": "covidfrontline-nks101703365",
+    "storage_bucket": "covidfrontline-nks101703365.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315449396820:android:3bdca7300124fed326e7c1",
+        "android_client_info": {
+          "package_name": "com.nks101703365.covid_frontline"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "315449396820-2uujh639g05g99oct7k24em48elrllqm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nks101703365.covid_frontline",
+            "certificate_hash": "d44c3526e13c6ff424c3d2a5d2636395bf9542c1"
+          }
+        },
+        {
+          "client_id": "315449396820-taflqq7ulj772i6vk6jje85vhuo6ahjk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA281xcU8tvtLgaJuW1teeUEljlIALXTT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "315449396820-taflqq7ulj772i6vk6jje85vhuo6ahjk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
