@@ -1,5 +1,6 @@
 import 'package:covid_frontline/screens/can_help_screen.dart';
 import 'package:covid_frontline/screens/need_help_screen.dart';
+import 'package:covid_frontline/screens/officia.dart';
 import 'package:covid_frontline/screens/view_helpers.dart';
 import 'package:covid_frontline/screens/view_needy.dart';
 import 'package:covid_frontline/screens/welcome_screen.dart';
@@ -16,7 +17,7 @@ class OfficialsHome extends StatefulWidget {
 class _OfficialsHomeState extends State<OfficialsHome> {
   int _selectedIndex = 0;
   static List<Widget> _widgetOptions = <Widget>[
-    WelcomeScreen(),
+    OfficialWelcomeScreen(),
     ViewNeedyScreen(),
     ViewHelpersScreen(),
   ];

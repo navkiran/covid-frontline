@@ -43,8 +43,14 @@ class OfficialWelcomeScreen extends StatelessWidget {
                   topRight: Radius.circular(20.0),
                 ),
               ),
-              child: Text('You\'re now in administration section of the app',
-                  style: TextStyle(fontSize: 20)),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                      'You\'re now in administration section of the app',
+                      style: TextStyle(fontSize: 30, color: Colors.white)),
+                ),
+              ),
             ),
           ),
         ],

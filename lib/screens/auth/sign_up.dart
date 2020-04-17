@@ -114,7 +114,8 @@ class _SignUpPageState extends State<SignUpPage> {
           "role": _role == null ? 'admin' : 'user',
           "district": _district,
         });
-        Navigator.pushReplacement(
+        Navigator.pop(context);
+        Navigator.push(
             context, MaterialPageRoute(builder: (context) => LoginPage()));
       } catch (e) {
         print(e.message);
