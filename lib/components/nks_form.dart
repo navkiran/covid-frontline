@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:covid_frontline/ui/nks_constants.dart';
 import 'package:covid_frontline/components/rounded_button.dart';
@@ -5,13 +6,38 @@ import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final _firestore = Firestore.instance;
+final _auth = FirebaseAuth.instance;
+FirebaseUser user;
+
+String filledName,
+    filledContact,
+    _region,
+    _subregion,
+    filledAddress,
+    filledNeed,
+    user_id;
+var request = {
+  'name': filledName,
+  'contact': filledContact,
+  'state': _region,
+  'district': _subregion,
+  'address': filledAddress,
+  'need': filledNeed,
+  'uid': user_id,
+};
 
 class NksForm extends StatefulWidget {
+  final String job;
   final bool request;
   final String title;
   final String needText;
   final List<Widget> extrafields;
-  NksForm({this.request = true, this.title, this.extrafields, this.needText});
+  NksForm(
+      {this.request = true,
+      this.job,
+      this.title,
+      this.extrafields,
+      this.needText});
   @override
   _NksFormState createState() => _NksFormState();
 }
@@ -21,6 +47,12 @@ class _NksFormState extends State<NksForm> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    getUser();
+  }
+
+  getUser() async {
+    user = await _auth.currentUser();
+    user_id = user.uid;
   }
 
   @override
@@ -56,7 +88,9 @@ class _NksFormState extends State<NksForm> {
                             minLines: 5,
                             maxLines: null,
                             textAlign: TextAlign.center,
-                            onChanged: (value) {},
+                            onChanged: (value) {
+                              filledNeed = value;
+                            },
                             decoration: kTextFieldDecoration.copyWith(
                                 hintText: widget.needText, hintMaxLines: 4),
                           )
@@ -64,7 +98,9 @@ class _NksFormState extends State<NksForm> {
                     SizedBox(height: 10.0),
                     TextField(
                       textAlign: TextAlign.center,
-                      onChanged: (value) {},
+                      onChanged: (value) {
+                        filledName = value;
+                      },
                       decoration: kTextFieldDecoration.copyWith(
                           hintText: 'Enter name of recipient'),
                     ),
@@ -72,7 +108,9 @@ class _NksFormState extends State<NksForm> {
                     TextField(
                       keyboardType: TextInputType.phone,
                       textAlign: TextAlign.center,
-                      onChanged: (value) {},
+                      onChanged: (value) {
+                        filledContact = value;
+                      },
                       decoration:
                           kTextFieldDecoration.copyWith(hintText: 'Contact'),
                     ),
@@ -82,7 +120,9 @@ class _NksFormState extends State<NksForm> {
                       minLines: 3,
                       maxLines: null,
                       textAlign: TextAlign.center,
-                      onChanged: (value) {},
+                      onChanged: (value) {
+                        filledAddress = value;
+                      },
                       decoration: kTextFieldDecoration.copyWith(
                           hintText: 'Street Address'),
                     ),
@@ -90,6 +130,12 @@ class _NksFormState extends State<NksForm> {
                 ),
                 RoundedButton(
                   onPressed: () {
+                    String coll =
+                        widget.request == true ? 'requests' : 'applications';
+                    _firestore
+                        .collection(coll)
+                        .document(user.uid)
+                        .setData(request);
                     Navigator.pop(context);
                   },
                   title: 'Submit',
@@ -110,7 +156,7 @@ class StateDropDown extends StatefulWidget {
 }
 
 class _StateDropDownState extends State<StateDropDown> {
-  String _region, _subregion, sname;
+  String sname;
   @override
   void initState() {
     super.initState();

@@ -1,4 +1,5 @@
 import 'package:dropdown_formfield/dropdown_formfield.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:covid_frontline/ui/nks_constants.dart';
 import 'package:covid_frontline/components/rounded_button.dart';
@@ -6,6 +7,37 @@ import 'package:covid_frontline/components/nks_form.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final _firestore = Firestore.instance;
+final _auth = FirebaseAuth.instance;
+FirebaseUser user;
+var jobs = [
+  {
+    "display": "Plumbing",
+    "value": "Plumbing",
+  },
+  {
+    "display": "Electricy/Electrical Appliances",
+    "value": "Electricy/Electrical Appliances",
+  }
+];
+String filledName,
+    filledContact,
+    _region,
+    _subregion,
+    filledAddress,
+    filledNeed,
+    user_id,
+    job;
+
+var request = {
+  'name': filledName,
+  'need': filledNeed,
+  'job': job,
+  'uid': user_id,
+  'contact': filledContact,
+  'state': _region,
+  'district': _subregion,
+  'address': filledAddress,
+};
 
 class RegTechnicalForm extends StatefulWidget {
   @override
@@ -13,7 +45,113 @@ class RegTechnicalForm extends StatefulWidget {
 }
 
 class _RegTechnicalFormState extends State<RegTechnicalForm> {
-  String _region, _subregion, sname;
+  String sname;
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+  }
+
+  getUser() async {
+    user = await _auth.currentUser();
+    user_id = user.uid;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Register as Technical Worker'),
+          backgroundColor: kFgcolor,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20),
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: Text(
+                    'You will be vetted before approval.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                Column(
+                  children: <Widget>[
+                    TextField(
+                      keyboardType: TextInputType.multiline,
+                      minLines: 5,
+                      maxLines: null,
+                      textAlign: TextAlign.center,
+                      onChanged: (value) {
+                        filledNeed = value;
+                      },
+                      decoration: kTextFieldDecoration.copyWith(
+                          hintText:
+                              'Any travel history or something we should know about.',
+                          hintMaxLines: 4),
+                    ),
+                    SizedBox(height: 10.0),
+                    TextField(
+                      textAlign: TextAlign.center,
+                      onChanged: (value) {
+                        filledName = value;
+                      },
+                      decoration:
+                          kTextFieldDecoration.copyWith(hintText: 'Name'),
+                    ),
+                    SizedBox(height: 10.0),
+                    TextField(
+                      keyboardType: TextInputType.phone,
+                      textAlign: TextAlign.center,
+                      onChanged: (value) {
+                        filledContact = value;
+                      },
+                      decoration:
+                          kTextFieldDecoration.copyWith(hintText: 'Contact'),
+                    ),
+                    StateDropDown(),
+                    TextField(
+                      keyboardType: TextInputType.multiline,
+                      minLines: 3,
+                      maxLines: null,
+                      textAlign: TextAlign.center,
+                      onChanged: (value) {
+                        filledAddress = value;
+                      },
+                      decoration: kTextFieldDecoration.copyWith(
+                          hintText: 'Street Address'),
+                    ),
+                  ],
+                ),
+                RoundedButton(
+                  onPressed: () {
+                    _firestore
+                        .collection('applications')
+                        .document(user.uid)
+                        .setData(request);
+                    Navigator.pop(context);
+                  },
+                  title: 'Submit',
+                  color: kFgcolor,
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class StateDropDown extends StatefulWidget {
+  @override
+  _StateDropDownState createState() => _StateDropDownState();
+}
+
+class _StateDropDownState extends State<StateDropDown> {
+  String sname;
   @override
   void initState() {
     super.initState();
@@ -22,41 +160,117 @@ class _RegTechnicalFormState extends State<RegTechnicalForm> {
     _subregion = '';
   }
 
-  var _data = [
-    {
-      "display": "Plumbing",
-      "value": "Plumbing",
-    },
-    {
-      "display": "Electricy/Electrical Appliances",
-      "value": "Electricy/Electrical Appliances",
-    }
-  ];
   @override
   Widget build(BuildContext context) {
-    return NksForm(
-      request: false,
-      title: 'Register as a Technical Worker',
-      extrafields: <Widget>[
+    return SafeArea(
+        child: Column(
+      children: <Widget>[
         DropDownFormField(
           errorText: 'Please fill',
           textField: 'display',
           valueField: 'value',
-          titleText: 'What kind of technical worker are you?',
-          value: _region,
+          titleText: 'Problem Category',
+          value: job,
           onSaved: (value) {
             setState(() {
-              _region = value;
+              job = value;
             });
           },
           onChanged: (value) {
             setState(() {
-              _region = value;
+              job = value;
             });
           },
-          dataSource: _data,
+          dataSource: jobs,
         ),
+        StreamBuilder<QuerySnapshot>(
+            stream: _firestore.collection('states').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+              final documents = snapshot.data.documents;
+              var _data = [];
+              for (var document in documents) {
+                _data.add(document.data['sname']);
+              }
+
+              return Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: DropDownFormField(
+                      errorText: 'Please fill',
+                      textField: 'display',
+                      valueField: 'value',
+                      titleText: 'State',
+                      value: _region,
+                      onSaved: (value) {
+                        setState(() {
+                          _region = value;
+                        });
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          _region = value;
+                        });
+                      },
+                      dataSource: _data,
+                    ),
+                  ),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: _firestore
+                        .collection("states")
+                        .where("sname.value", isEqualTo: _region)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                      final documents = snapshot.data.documents;
+                      var _districtData = [];
+                      for (var document in documents) {
+                        var dist = document.data['districts'];
+                        for (var d in dist) {
+                          _districtData.add(d);
+                        }
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: DropDownFormField(
+                          errorText: 'Please fill',
+                          textField: 'display',
+                          valueField: 'value',
+                          titleText: 'District',
+                          value: _subregion,
+                          onSaved: (value) {
+                            setState(() {
+                              _subregion = value;
+                            });
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _subregion = value;
+                            });
+                          },
+                          dataSource: _districtData,
+                        ),
+                      );
+                    },
+                  )
+                ],
+              );
+            })
       ],
-    );
+    ));
   }
 }
