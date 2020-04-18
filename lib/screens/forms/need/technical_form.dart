@@ -1,14 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:covid_frontline/components/rounded_button.dart';
-import 'package:covid_frontline/ui/nks_constants.dart';
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:covid_frontline/components/nks_form.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:covid_frontline/ui/nks_constants.dart';
 
 final _firestore = Firestore.instance;
 final _auth = FirebaseAuth.instance;
 FirebaseUser user;
+String filledName,
+    filledContact,
+    region,
+    subregion,
+    filledAddress,
+    filledNeed,
+    userId,
+    job;
+
 var jobs = [
   {
     "display": "Plumbing",
@@ -19,33 +27,26 @@ var jobs = [
     "value": "Electricy/Electrical Appliances",
   }
 ];
-String filledName,
-    filledContact,
-    _region,
-    _subregion,
-    filledAddress,
-    filledNeed,
-    user_id,
-    job;
 
-var request = {
+var technicalServiceRequest = {
   'name': filledName,
-  'need': filledNeed,
-  'job': job,
-  'uid': user_id,
   'contact': filledContact,
-  'state': _region,
-  'district': _subregion,
+  'state': region,
+  'district': subregion,
   'address': filledAddress,
+  'need': filledNeed,
+  'category': job,
+  'uid': userId,
 };
 
-class TechnicalForm extends StatefulWidget {
+class TechnicalRequestForm extends StatefulWidget {
   @override
-  _TechnicalFormState createState() => _TechnicalFormState();
+  _TechnicalRequestFormState createState() => _TechnicalRequestFormState();
 }
 
-class _TechnicalFormState extends State<TechnicalForm> {
-  String sname;
+class _TechnicalRequestFormState extends State<TechnicalRequestForm> {
+  final _rationFormKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +55,7 @@ class _TechnicalFormState extends State<TechnicalForm> {
 
   getUser() async {
     user = await _auth.currentUser();
-    user_id = user.uid;
+    userId = user.uid;
   }
 
   @override
@@ -62,79 +63,129 @@ class _TechnicalFormState extends State<TechnicalForm> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Request for Technical Worker'),
+          title: Text('Request for Technical Service'),
           backgroundColor: kFgcolor,
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0),
-                  child: Text(
-                    'Please ensure your request is genuine, it may be verified.',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                Column(
-                  children: <Widget>[
-                    TextField(
-                      keyboardType: TextInputType.multiline,
-                      minLines: 5,
-                      maxLines: null,
-                      textAlign: TextAlign.center,
-                      onChanged: (value) {
-                        filledNeed = value;
-                      },
-                      decoration: kTextFieldDecoration.copyWith(
-                          hintText: 'Problem details', hintMaxLines: 4),
-                    ),
-                    SizedBox(height: 10.0),
-                    TextField(
-                      textAlign: TextAlign.center,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Form(
+              key: _rationFormKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      decoration: kFormTextFieldDecoration.copyWith(
+                        hintText: 'Enter your name',
+                        labelText: 'Name',
+                        icon: Icon(
+                          Icons.person,
+                          color: kFgcolor,
+                        ),
+                      ),
                       onChanged: (value) {
                         filledName = value;
                       },
-                      decoration: kTextFieldDecoration.copyWith(
-                          hintText: 'Enter name of recipient'),
                     ),
-                    SizedBox(height: 10.0),
-                    TextField(
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
                       keyboardType: TextInputType.phone,
-                      textAlign: TextAlign.center,
+                      decoration: kFormTextFieldDecoration.copyWith(
+                        hintText: 'Enter your contact',
+                        labelText: 'Contact',
+                        icon: Icon(
+                          Icons.phone,
+                          color: kFgcolor,
+                        ),
+                      ),
                       onChanged: (value) {
                         filledContact = value;
                       },
-                      decoration:
-                          kTextFieldDecoration.copyWith(hintText: 'Contact'),
                     ),
-                    StateDropDown(),
-                    TextField(
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
                       keyboardType: TextInputType.multiline,
-                      minLines: 3,
-                      maxLines: null,
-                      textAlign: TextAlign.center,
+                      maxLines: 3,
+                      minLines: 2,
+                      decoration: kFormTextFieldDecoration.copyWith(
+                        hintText:
+                            'Please describe the issue you are facing - plumbing, electrical, etc.',
+                        labelText: 'Technical Service Needed',
+                        icon: Icon(
+                          Icons.pan_tool,
+                          color: kFgcolor,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        filledNeed = value;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DropDownFormField(
+                      errorText: 'Please fill',
+                      textField: 'display',
+                      valueField: 'value',
+                      titleText: 'Problem Category',
+                      value: job,
+                      onSaved: (value) {
+                        setState(() {
+                          job = value;
+                        });
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          job = value;
+                        });
+                      },
+                      dataSource: jobs,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 3,
+                      minLines: 2,
+                      decoration: kFormTextFieldDecoration.copyWith(
+                        hintText: 'Enter your street address',
+                        labelText: 'Street Address',
+                        icon: Icon(
+                          Icons.location_city,
+                          color: kFgcolor,
+                        ),
+                      ),
                       onChanged: (value) {
                         filledAddress = value;
                       },
-                      decoration: kTextFieldDecoration.copyWith(
-                          hintText: 'Street Address'),
                     ),
-                  ],
-                ),
-                RoundedButton(
-                  onPressed: () {
-                    _firestore
-                        .collection('requests')
-                        .document(user.uid)
-                        .setData(request);
-                    Navigator.pop(context);
-                  },
-                  title: 'Submit',
-                  color: kFgcolor,
-                )
-              ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: GroupedDropDown(),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: RoundedButton(
+                        title: 'Submit',
+                        onPressed: () {
+                          _firestore
+                              .collection('technical_service_requests')
+                              .document(
+                                  DateTime.now().toString() + '-' + userId)
+                              .setData(technicalServiceRequest);
+                          Navigator.pop(context);
+                        }),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -143,132 +194,111 @@ class _TechnicalFormState extends State<TechnicalForm> {
   }
 }
 
-class StateDropDown extends StatefulWidget {
+class GroupedDropDown extends StatefulWidget {
   @override
-  _StateDropDownState createState() => _StateDropDownState();
+  _GroupedDropDownState createState() => _GroupedDropDownState();
 }
 
-class _StateDropDownState extends State<StateDropDown> {
+class _GroupedDropDownState extends State<GroupedDropDown> {
   String sname;
   @override
   void initState() {
     super.initState();
-    _region = '';
-
-    _subregion = '';
+    region = '';
+    subregion = '';
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Column(
-      children: <Widget>[
-        DropDownFormField(
-          errorText: 'Please fill',
-          textField: 'display',
-          valueField: 'value',
-          titleText: 'Problem Category',
-          value: job,
-          onSaved: (value) {
-            setState(() {
-              job = value;
-            });
-          },
-          onChanged: (value) {
-            setState(() {
-              job = value;
-            });
-          },
-          dataSource: jobs,
-        ),
-        StreamBuilder<QuerySnapshot>(
-            stream: _firestore.collection('states').snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-              final documents = snapshot.data.documents;
-              var _data = [];
-              for (var document in documents) {
-                _data.add(document.data['sname']);
-              }
+    return StreamBuilder<QuerySnapshot>(
+        stream: _firestore.collection('states').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          final documents = snapshot.data.documents;
+          var _statesData = [];
+          for (var document in documents) {
+            _statesData.add(document.data['sname']);
+          }
 
-              return Column(
-                children: <Widget>[
-                  Padding(
+          return Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: DropDownFormField(
+                  errorText: 'Please fill the state where you are',
+                  textField: 'display',
+                  valueField: 'value',
+                  titleText: 'State',
+                  value: region,
+                  onSaved: (value) {
+                    setState(() {
+                      region = value;
+                    });
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      region = value;
+                    });
+                  },
+                  dataSource: _statesData,
+                ),
+              ),
+              StreamBuilder<QuerySnapshot>(
+                // region is the currently selected state, now we fetch district choices
+                // each state has a list of districts
+                // each element in states and then in list of districts is of map<string,string> type
+                stream: _firestore
+                    .collection("states")
+                    .where("sname.value", isEqualTo: region)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                  final documents = snapshot.data.documents;
+                  var _districtData = [];
+                  for (var document in documents) {
+                    var districtsList = document.data['districts'];
+                    for (var districtChoice in districtsList) {
+                      _districtData.add(districtChoice);
+                    }
+                  }
+
+                  return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: DropDownFormField(
                       errorText: 'Please fill',
                       textField: 'display',
                       valueField: 'value',
-                      titleText: 'State',
-                      value: _region,
+                      titleText: 'District',
+                      value: subregion,
                       onSaved: (value) {
                         setState(() {
-                          _region = value;
+                          subregion = value;
                         });
                       },
                       onChanged: (value) {
                         setState(() {
-                          _region = value;
+                          subregion = value;
                         });
                       },
-                      dataSource: _data,
+                      dataSource: _districtData,
                     ),
-                  ),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: _firestore
-                        .collection("states")
-                        .where("sname.value", isEqualTo: _region)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                      final documents = snapshot.data.documents;
-                      var _districtData = [];
-                      for (var document in documents) {
-                        var dist = document.data['districts'];
-                        for (var d in dist) {
-                          _districtData.add(d);
-                        }
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: DropDownFormField(
-                          errorText: 'Please fill',
-                          textField: 'display',
-                          valueField: 'value',
-                          titleText: 'District',
-                          value: _subregion,
-                          onSaved: (value) {
-                            setState(() {
-                              _subregion = value;
-                            });
-                          },
-                          onChanged: (value) {
-                            setState(() {
-                              _subregion = value;
-                            });
-                          },
-                          dataSource: _districtData,
-                        ),
-                      );
-                    },
-                  )
-                ],
-              );
-            })
-      ],
-    ));
+                  );
+                },
+              )
+            ],
+          );
+        });
   }
 }

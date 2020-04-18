@@ -1,6 +1,5 @@
 import 'package:covid_frontline/screens/auth/officials_home.dart';
 import 'package:covid_frontline/screens/auth/user_home.dart';
-import 'package:covid_frontline/screens/welcome_screen.dart';
 import 'package:covid_frontline/ui/nks_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

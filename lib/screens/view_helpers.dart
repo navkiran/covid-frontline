@@ -1,12 +1,9 @@
-import 'package:covid_frontline/screens/application_screen.dart';
 import 'package:covid_frontline/screens/forms/provide/contribute_form.dart';
-import 'package:covid_frontline/ui/nks_constants.dart';
+import 'package:covid_frontline/screens/officialscreens/viewtechreg.dart';
+import 'package:covid_frontline/screens/officialscreens/viewvolunteerappl.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:covid_frontline/components/rounded_card.dart';
 import 'package:line_icons/line_icons.dart';
-
-final _firestore = Firestore.instance;
 
 class ViewHelpersScreen extends StatefulWidget {
   @override
@@ -32,12 +29,25 @@ class _ViewHelpersScreenState extends State<ViewHelpersScreen> {
           ),
           RoundedCard(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ApplicationScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ViewVolunteerApplications()));
             },
             title: 'Applications',
-            subtitle:
-                'Process applications for volunteers and technical workers.',
+            subtitle: 'Process applications for volunteers.',
+            icon: Icons.verified_user,
+          ),
+          RoundedCard(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ViewTechnicalWorkerRegistrations()));
+            },
+            title: 'Registrations',
+            subtitle: 'Process registerations for technical workers.',
             icon: Icons.verified_user,
           ),
         ],

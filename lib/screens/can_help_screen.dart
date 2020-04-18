@@ -34,8 +34,10 @@ class CanHelpScreen extends StatelessWidget {
           ),
           RoundedCard(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => RegTechnicalForm()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TechnicalRegisterForm()));
             },
             title: 'Technical Worker',
             subtitle: 'I want to register as an electrician, plumber, etc.',

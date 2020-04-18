@@ -1,4 +1,3 @@
-import 'package:covid_frontline/components/nks_form.dart';
 import 'package:flutter/material.dart';
 
 class Card extends StatefulWidget {

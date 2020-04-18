@@ -1,4 +1,3 @@
-import 'package:covid_frontline/components/nks_navbar.dart';
 import 'package:covid_frontline/components/rounded_button.dart';
 import 'package:covid_frontline/ui/nks_constants.dart';
 import 'package:line_icons/line_icons.dart';

@@ -8,22 +8,23 @@ final _firestore = Firestore.instance;
 final _auth = FirebaseAuth.instance;
 FirebaseUser user;
 
-class ApplicationScreen extends StatefulWidget {
+class ViewVolunteerApplications extends StatefulWidget {
   @override
-  _ApplicationScreenState createState() => _ApplicationScreenState();
+  _ViewVolunteerApplicationsState createState() =>
+      _ViewVolunteerApplicationsState();
 }
 
-class _ApplicationScreenState extends State<ApplicationScreen> {
-  String district;
+class _ViewVolunteerApplicationsState extends State<ViewVolunteerApplications> {
+  String userDistrict, userState;
   getUser() async {
     user = await _auth.currentUser();
     var doc = await _firestore.collection('users_db').document(user.uid).get();
-    district = doc.data['district'];
+    userDistrict = doc.data['district'];
+    userState = doc.data['state'];
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getUser();
   }
@@ -39,9 +40,8 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
       body: Container(
         child: StreamBuilder<QuerySnapshot>(
           stream: _firestore
-              .collection('applications')
-              .where("state", isEqualTo: 'Punjab')
-              .where("district", isEqualTo: district)
+              .collection('volunteer_applications')
+              .where("district", isEqualTo: userDistrict)
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
@@ -54,7 +54,7 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
             final documents = snapshot.data.documents;
             List<Widget> _show = [];
             for (var document in documents) {
-              if (document.data['district'] == district)
+              if (document.data['state'] == userState)
                 _show.add(card_class.Card(
                   filledAddress: document.data['address'],
                   filledName: document.data['name'],

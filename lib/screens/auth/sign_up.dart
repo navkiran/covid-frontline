@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 Firestore _firestore = Firestore.instance;
-String _role;
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -16,7 +15,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String _email, _password, _district;
+  String _email, _password, _district, _state, _role;
   final _roles = [
     {'display': 'Admin', 'value': 'admin'},
     {'display': 'User', 'value': 'value'}
@@ -40,9 +39,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     if (input.isEmpty) {
                       return 'Provide an email';
                     }
-                    // if (input.contains('@gov.in') == false) {
-                    //   return 'This is for authorized government employees only';
-                    // }
+                    if (_role == 'admin' &&
+                        input.contains('.gov.in') == false) {
+                      return 'Use an email that has .gov.in';
+                    }
+                    return null;
                   },
                   decoration: kTextFieldDecoration.copyWith(hintText: 'Email'),
                   onSaved: (input) => _email = input,
@@ -51,8 +52,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 TextFormField(
                   validator: (input) {
                     if (input.length < 6) {
-                      return 'Longer password please';
+                      return 'Longer password please. Add special characters.';
                     }
+                    return null;
                   },
                   decoration:
                       kTextFieldDecoration.copyWith(hintText: 'Password'),
@@ -63,17 +65,32 @@ class _SignUpPageState extends State<SignUpPage> {
                 TextFormField(
                   validator: (input) {
                     if (input.isEmpty) {
-                      return 'Provide a state';
+                      return 'Provide a district';
                     }
+                    return null;
                   },
                   decoration:
                       kTextFieldDecoration.copyWith(hintText: 'District'),
-                  onSaved: (input) => _district = input,
+                  onSaved: (input) {
+                    setState(() {
+                      _district = input;
+                    });
+                  },
                 ),
                 SizedBox(height: 10.0),
                 TextFormField(
+                  validator: (input) {
+                    if (input.isEmpty) {
+                      return 'Provide a state';
+                    }
+                    return null;
+                  },
                   decoration: kTextFieldDecoration.copyWith(hintText: 'State'),
-                  onSaved: null,
+                  onSaved: (input) {
+                    setState(() {
+                      _state = input;
+                    });
+                  },
                 ),
                 SizedBox(height: 10.0),
                 DropDownFormField(
@@ -94,14 +111,16 @@ class _SignUpPageState extends State<SignUpPage> {
                   },
                   dataSource: _roles,
                 ),
-                RoundedButton(title: 'Sign Up', onPressed: signUp),
+                RoundedButton(
+                    title: 'Sign Up',
+                    onPressed: () => signUp(_role, _district, _state)),
               ],
             )),
       ),
     );
   }
 
-  void signUp() async {
+  void signUp(String _role, String _district, String _state) async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       try {
@@ -110,9 +129,10 @@ class _SignUpPageState extends State<SignUpPage> {
         FirebaseUser user = await FirebaseAuth.instance.currentUser();
         _firestore.collection('users_db').document(user.uid).setData({
           "uid": user.uid,
-          "name": "nks",
-          "role": _role == null ? 'admin' : 'user',
+          "name": Timestamp.fromDate(DateTime.now()),
+          "role": _role,
           "district": _district,
+          "state": _state,
         });
         Navigator.pop(context);
         Navigator.push(

@@ -1,7 +1,6 @@
 import 'package:covid_frontline/ui/nks_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:covid_frontline/components/rounded_card.dart';
 
 final _firestore = Firestore.instance;
 

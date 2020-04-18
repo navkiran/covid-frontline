@@ -50,11 +50,14 @@ class RoundedCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 10.0),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[200],
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[200],
+                        ),
                       ),
                     ),
                   ],

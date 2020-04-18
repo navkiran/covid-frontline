@@ -34,8 +34,10 @@ class NeedHelpScreen extends StatelessWidget {
           ),
           RoundedCard(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => TechnicalForm()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TechnicalRequestForm()));
             },
             title: 'Technical Services',
             subtitle:
