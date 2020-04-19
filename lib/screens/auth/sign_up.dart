@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 Firestore _firestore = Firestore.instance;
+String region, subregion;
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -15,7 +16,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String _email, _password, _district, _state, _role;
+  String _email, _password, _role;
   final _roles = [
     {'display': 'Admin', 'value': 'admin'},
     {'display': 'User', 'value': 'value'}
@@ -28,94 +29,67 @@ class _SignUpPageState extends State<SignUpPage> {
       appBar: new AppBar(
         backgroundColor: kFgcolor,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-            key: _formKey,
-            child: Column(
-              children: <Widget>[
-                TextFormField(
-                  validator: (input) {
-                    if (input.isEmpty) {
-                      return 'Provide an email';
-                    }
-                    if (_role == 'admin' &&
-                        input.contains('.gov.in') == false) {
-                      return 'Use an email that has .gov.in';
-                    }
-                    return null;
-                  },
-                  decoration: kTextFieldDecoration.copyWith(hintText: 'Email'),
-                  onSaved: (input) => _email = input,
-                ),
-                SizedBox(height: 10.0),
-                TextFormField(
-                  validator: (input) {
-                    if (input.length < 6) {
-                      return 'Longer password please. Add special characters.';
-                    }
-                    return null;
-                  },
-                  decoration:
-                      kTextFieldDecoration.copyWith(hintText: 'Password'),
-                  onSaved: (input) => _password = input,
-                  obscureText: true,
-                ),
-                SizedBox(height: 10.0),
-                TextFormField(
-                  validator: (input) {
-                    if (input.isEmpty) {
-                      return 'Provide a district';
-                    }
-                    return null;
-                  },
-                  decoration:
-                      kTextFieldDecoration.copyWith(hintText: 'District'),
-                  onSaved: (input) {
-                    setState(() {
-                      _district = input;
-                    });
-                  },
-                ),
-                SizedBox(height: 10.0),
-                TextFormField(
-                  validator: (input) {
-                    if (input.isEmpty) {
-                      return 'Provide a state';
-                    }
-                    return null;
-                  },
-                  decoration: kTextFieldDecoration.copyWith(hintText: 'State'),
-                  onSaved: (input) {
-                    setState(() {
-                      _state = input;
-                    });
-                  },
-                ),
-                SizedBox(height: 10.0),
-                DropDownFormField(
-                  errorText: 'Please fill',
-                  textField: 'display',
-                  valueField: 'value',
-                  titleText: 'Role',
-                  value: _role,
-                  onSaved: (value) {
-                    setState(() {
-                      _role = value;
-                    });
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      _role = value;
-                    });
-                  },
-                  dataSource: _roles,
-                ),
-                RoundedButton(
-                    title: 'Sign Up',
-                    onPressed: () => signUp(_role, _district, _state)),
-              ],
-            )),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    validator: (input) {
+                      if (input.isEmpty) {
+                        return 'Provide an email';
+                      }
+                      if (_role == 'admin' &&
+                          input.contains('.gov.in') == false) {
+                        return 'Use an email that has .gov.in';
+                      }
+                      return null;
+                    },
+                    decoration:
+                        kTextFieldDecoration.copyWith(hintText: 'Email'),
+                    onSaved: (input) => _email = input,
+                  ),
+                  SizedBox(height: 10.0),
+                  TextFormField(
+                    validator: (input) {
+                      if (input.length < 6) {
+                        return 'Longer password please. Add special characters.';
+                      }
+                      return null;
+                    },
+                    decoration:
+                        kTextFieldDecoration.copyWith(hintText: 'Password'),
+                    onSaved: (input) => _password = input,
+                    obscureText: true,
+                  ),
+                  StateDropDown(),
+                  SizedBox(height: 10.0),
+                  DropDownFormField(
+                    errorText: 'Please fill',
+                    textField: 'display',
+                    valueField: 'value',
+                    titleText: 'Role',
+                    value: _role,
+                    onSaved: (value) {
+                      setState(() {
+                        _role = value;
+                      });
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        _role = value;
+                      });
+                    },
+                    dataSource: _roles,
+                  ),
+                  RoundedButton(
+                      title: 'Sign Up',
+                      onPressed: () => signUp(_role, region, subregion)),
+                ],
+              )),
+        ),
       ),
     );
   }
@@ -141,5 +115,114 @@ class _SignUpPageState extends State<SignUpPage> {
         print(e.message);
       }
     }
+  }
+}
+
+class StateDropDown extends StatefulWidget {
+  @override
+  _StateDropDownState createState() => _StateDropDownState();
+}
+
+class _StateDropDownState extends State<StateDropDown> {
+  String sname;
+  @override
+  void initState() {
+    super.initState();
+    region = '';
+    subregion = '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+        stream: _firestore.collection('states').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          final documents = snapshot.data.documents;
+          var _statesData = [];
+          for (var document in documents) {
+            _statesData.add(document.data['sname']);
+          }
+
+          return Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: DropDownFormField(
+                  errorText: 'Please fill the state where you are',
+                  textField: 'display',
+                  valueField: 'value',
+                  titleText: 'State',
+                  value: region,
+                  onSaved: (value) {
+                    setState(() {
+                      region = value;
+                    });
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      region = value;
+                    });
+                  },
+                  dataSource: _statesData,
+                ),
+              ),
+              StreamBuilder<QuerySnapshot>(
+                // region is the currently selected state, now we fetch district choices
+                // each state has a list of districts
+                // each element in states and then in list of districts is of map<string,string> type
+                stream: _firestore
+                    .collection("states")
+                    .where("sname.value", isEqualTo: region)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                  final documents = snapshot.data.documents;
+                  var _districtData = [];
+                  for (var document in documents) {
+                    var districtsList = document.data['districts'];
+                    for (var districtChoice in districtsList) {
+                      _districtData.add(districtChoice);
+                    }
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: DropDownFormField(
+                      errorText: 'Please fill',
+                      textField: 'display',
+                      valueField: 'value',
+                      titleText: 'District',
+                      value: subregion,
+                      onSaved: (value) {
+                        setState(() {
+                          subregion = value;
+                        });
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          subregion = value;
+                        });
+                      },
+                      dataSource: _districtData,
+                    ),
+                  );
+                },
+              )
+            ],
+          );
+        });
   }
 }
