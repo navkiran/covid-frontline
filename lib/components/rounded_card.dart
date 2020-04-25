@@ -17,7 +17,7 @@ class RoundedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 15),
+      padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
       child: Material(
         elevation: 5.0,
         color: color == null ? Theme.of(context).accentColor : color,

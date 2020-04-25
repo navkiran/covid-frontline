@@ -1,5 +1,6 @@
 import 'package:covid_frontline/screens/can_help_screen.dart';
 import 'package:covid_frontline/screens/need_help_screen.dart';
+import 'package:covid_frontline/screens/stranded.dart';
 import 'package:covid_frontline/screens/welcome_screen.dart';
 import 'package:covid_frontline/ui/nks_constants.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class _UserHomeState extends State<UserHome> {
     WelcomeScreen(),
     NeedHelpScreen(),
     CanHelpScreen(),
+    StrandedHelp(),
   ];
 
   static List<GButton> _buttons = [
@@ -33,6 +35,11 @@ class _UserHomeState extends State<UserHome> {
     GButton(
       icon: LineIcons.hand_stop_o,
       text: 'Can Help',
+      iconColor: Colors.white,
+    ),
+    GButton(
+      icon: LineIcons.location_arrow,
+      text: 'Stranded',
       iconColor: Colors.white,
     )
   ];

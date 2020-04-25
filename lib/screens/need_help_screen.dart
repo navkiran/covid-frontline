@@ -43,7 +43,7 @@ class NeedHelpScreen extends StatelessWidget {
             subtitle:
                 'I or someone near me needs a service like electrician, plumbing, etc.',
             icon: Icons.people,
-          ),
+          )
         ],
       ),
     ));

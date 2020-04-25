@@ -35,7 +35,7 @@ class _ViewTechnicalWorkerRegistrationsState
         child: Scaffold(
       appBar: AppBar(
         backgroundColor: kFgcolor,
-        title: Text('Viewing Applications'),
+        title: Text('Viewing Registrations'),
       ),
       body: Container(
         child: StreamBuilder<QuerySnapshot>(
