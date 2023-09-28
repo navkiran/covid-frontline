@@ -15,7 +15,7 @@ needed the most and maximum areas are covered. Technology has a huge role to pla
 
 ## Project Overview
 Project Video showing application working -
-[Youtube Demo]https://www.youtube.com/watch?v=yfeM9wjuTYc&themeRefresh=1)
+[Youtube Demo](https://www.youtube.com/watch?v=yfeM9wjuTYc&themeRefresh=1)
 
 Covid Frontline is an application to connect people who want to help with people who need
 it the most during the Pandemic.This allows for efficient distribution of resources even with
